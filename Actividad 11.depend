@@ -1,0 +1,21 @@
+# depslib dependency file v1.0
+1602018767 source:c:\users\rafae\documents\escuela\cucei\3°\ed\semana 11\actividad 11\main.cpp
+	"notationMenu.h"
+
+1602114002 c:\users\rafae\documents\escuela\cucei\3°\ed\semana 11\actividad 11\notationmenu.h
+	<iostream>
+	<string>
+	"stack.h"
+	"queue.h"
+
+1602018774 c:\users\rafae\documents\escuela\cucei\3°\ed\semana 11\actividad 11\stack.h
+	<iostream>
+	<string>
+
+1602025249 c:\users\rafae\documents\escuela\cucei\3°\ed\semana 11\actividad 11\queue.h
+	<iostream>
+	<string>
+
+1602114455 source:c:\users\rafae\documents\escuela\cucei\3°\ed\semana 11\actividad 11\notationmenu.cpp
+	"notationMenu.h"
+
