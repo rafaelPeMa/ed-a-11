@@ -25,14 +25,6 @@ void NotationMenu::getExpression() {
 void NotationMenu::infixToPostfixed() {
     char c;
 
-    if ( !myStack.isEmpty() ) {
-        myStack.pop();
-    }
-
-    if ( !postFixed.isEmpty() ) {
-        postFixed.dequeue();
-    }
-
     while ( !infix.isEmpty() ) {
         c = infix.dequeue();
 

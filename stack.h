@@ -4,40 +4,52 @@
 #include <iostream>
 #include <string>
 
-///Declaracion
-
-class StackException : public std::exception {
-
-    private:
-        std::string msg;
-
-    public:
-        explicit StackException(const char* message) : msg(message) { }
-
-        explicit StackException(const std::string& message) : msg(message) { }
-
-        virtual ~StackException() throw () { }
-
-        virtual const char* what() const throw () {
-            return msg.c_str();
-            }
-    };
-
-template<class T, int SIZE = 1024>
+template<class T>
 class Stack {
 
     private:
-        T data[SIZE];
-        int top;
+        class Node {
+            private:
+                T data;
+                Node* next;
+            public:
+                Node();
+                Node(const T&);
 
-        void copyAll(const Stack<T, SIZE>&);
+                T getData() const;
+                Node* getNext() const;
+
+                void setData(const T&);
+                void setNext(Node*);
+            };
+
+        Node* anchor;
+
+        void copyAll(const Stack<T>&);
+        void deleteAll();
 
     public:
+
+        class Exception : public std::exception {
+            private:
+                std::string msg;
+            public:
+                explicit Exception(const char* message) : msg(message) { }
+
+                explicit Exception(const std::string& message) : msg(message) { }
+
+                virtual ~Exception() throw () { }
+
+                virtual const char* what() const throw () {
+                    return msg.c_str();
+                    }
+            };
+
         Stack();
-        Stack(const Stack<T, SIZE>&);
+        Stack(const Stack<T>&);
+        ~Stack();
 
         bool isEmpty() const;
-        bool isFull() const;
 
         void push(const T&);
 
@@ -45,69 +57,126 @@ class Stack {
 
         T getTop();
 
-        Stack<T, SIZE>& operator = (const Stack<T, SIZE>&);
+        Stack<T>& operator = (const Stack<T>&);
     };
 
-///Implementacion
+template<class T>
+Stack<T>::Node::Node() : next(nullptr) { }
 
-using namespace std;
+template<class T>
+Stack<T>::Node::Node(const T& t) : data(t), next(nullptr) { }
 
-template<class T, int SIZE>
-void Stack<T, SIZE>::copyAll(const Stack<T, SIZE>& s) {
-    int i(0);
-    while ( i <= s.top ) {
-        data[i] = s.data[i];
-        i++;
+template<class T>
+T Stack<T>::Node::getData() const {
+    return data;
+    }
+
+template<class T>
+typename Stack<T>::Node* Stack<T>::Node::getNext() const {
+    return next;
+    }
+
+template<class T>
+void Stack<T>::Node::setData(const T& t) {
+    data = t;
+    }
+
+template<class T>
+void Stack<T>::Node::setNext(Node* n) {
+    next = n;
+    }
+
+template<class T>
+void Stack<T>::copyAll(const Stack<T>& s) {
+    Node* aux(s.anchor);
+    Node* newNode;
+    Node* last;
+
+    if ( aux != nullptr ) {
+        newNode = new Node(aux->getData());
+        if ( newNode == nullptr ) {
+            throw Exception("Memoria no disponible, copyAll");
+            }
+        anchor = newNode;
+        last = newNode;
+        aux = aux->getNext();
+        while ( aux != nullptr ) {
+            newNode = new Node(aux->getData());
+            if ( newNode == nullptr ) {
+                throw Exception("Memoria no disponible, copyAll");
+                }
+            last->setNext(newNode);
+            last = newNode;
+            aux = aux->getNext();
+            }
         }
-    top = s.top;
     }
 
-template<class T, int SIZE>
-Stack<T, SIZE>::Stack() : top(-1) { }
+template<class T>
+void Stack<T>::deleteAll() {
+    Node* aux;
+    while ( anchor != nullptr ) {
+        aux = anchor;
+        anchor = anchor->getNext();
+        delete aux;
+        }
+    }
 
-template<class T, int SIZE>
-Stack<T, SIZE>::Stack(const Stack<T, SIZE>& s) {
+template<class T>
+Stack<T>::Stack() : anchor(nullptr) { }
+
+template<class T>
+Stack<T>::Stack(const Stack<T>& s) : anchor(nullptr) {
     copyAll(s);
     }
 
-template<class T, int SIZE>
-Stack<T, SIZE>& Stack<T, SIZE>::operator = (const Stack<T, SIZE>& s) {
+template<class T>
+Stack<T>::~Stack() {
+    deleteAll();
+}
+
+template<class T>
+bool Stack<T>::isEmpty() const {
+    return anchor == nullptr;
+    }
+
+template<class T>
+void Stack<T>::push(const T& t) {
+    Node* aux = new Node(t);
+    if ( aux == nullptr ) {
+        throw Exception("Memoria no disponible, push");
+        }
+
+    aux->setNext(anchor);
+    anchor = aux;
+    }
+
+template<class T>
+T Stack<T>::pop() {
+    if ( isEmpty() ) {
+        throw Exception("Insuficiencia de datos, pop");
+        }
+    T t(anchor->getData());
+    Node* aux(anchor);
+    anchor = anchor->getNext();
+    delete aux;
+    return t;
+    }
+
+template<class T>
+T Stack<T>::getTop() {
+    if ( isEmpty() ) {
+        throw Exception("Insuficiencia de datos, getTop");
+        }
+    return anchor->getData();
+    }
+
+template<class T>
+Stack<T>& Stack<T>::operator = (const Stack<T>& s) {
+    deleteAll();
     copyAll(s);
+
     return *this;
-    }
-
-template<class T, int SIZE>
-bool Stack<T, SIZE>::isEmpty() const {
-    return top == -1;
-    }
-
-template<class T, int SIZE>
-bool Stack<T, SIZE>::isFull() const {
-    return top == SIZE - 1;
-    }
-
-template<class T, int SIZE>
-void Stack<T, SIZE>::push(const T& a) {
-    if ( isFull() ) {
-        throw StackException("Desbordamiento de datos, push");
-        }
-    data[++top] = a;
-    }
-
-template<class T, int SIZE>
-T Stack<T, SIZE>::pop() {
-    if ( isEmpty() ) {
-        throw StackException("Insuficiencia de datos, pop");
-        }
-    return data[top--];
-    }
-
-template<class T, int SIZE>
-T Stack<T, SIZE>::getTop() {
-    if ( isEmpty() ) {
-        throw StackException("Insuficiencia de datos, getTop");
-        }
-    return data[top];
     }
 
 #endif // STACK_H_INCLUDED
